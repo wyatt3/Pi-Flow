@@ -1,0 +1,154 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Relay Scheduler (Pi)</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            margin: 20px;
+        }
+
+        .relay {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .active {
+            background: #e6ffe6;
+        }
+
+        .btn {
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Relay Scheduler</h1>
+    <section>
+        <h2>Relays</h2>
+        <div id="relays"></div>
+
+        <h3>Add Relay</h3>
+        <input id="relay-name" placeholder="Name" />
+        <input id="relay-gpio" placeholder="GPIO pin (e.g. 17)" type="number" />
+        <button id="add-relay">Add</button>
+    </section>
+
+    <hr />
+
+    <section>
+        <h2>Schedules</h2>
+        <div>
+            <label>Relay:
+                <select id="schedule-relay"></select>
+            </label>
+            <label>Start:
+                <input id="schedule-start" type="datetime-local" />
+            </label>
+            <label>Duration (min):
+                <input id="schedule-duration" type="number" value="1" min="1" />
+            </label>
+            <button id="add-schedule">Schedule</button>
+        </div>
+
+        <ul id="schedules"></ul>
+    </section>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+
+        const relaysDiv = document.getElementById('relays');
+        const scheduleRelaySelect = document.getElementById('schedule-relay');
+        const schedulesList = document.getElementById('schedules');
+
+        function renderRelays(list) {
+            relaysDiv.innerHTML = '';
+            scheduleRelaySelect.innerHTML = '';
+            list.forEach(r => {
+                const div = document.createElement('div');
+                div.className = 'relay' + (r.active ? ' active' : '');
+                div.innerHTML = `<div>${r.name} (GPIO ${r.gpio_pin})</div>`;
+                const controls = document.createElement('div');
+                const onBtn = document.createElement('button');
+                onBtn.className = 'btn';
+                onBtn.innerText = 'On';
+                onBtn.onclick = () => fetch(`/api/relays/${r.id}/on`, { method: 'POST' }).then(loadAll);
+                const offBtn = document.createElement('button');
+                offBtn.className = 'btn';
+                offBtn.innerText = 'Off';
+                offBtn.onclick = () => fetch(`/api/relays/${r.id}/off`, { method: 'POST' }).then(loadAll);
+                controls.appendChild(onBtn);
+                controls.appendChild(offBtn);
+                div.appendChild(controls);
+                relaysDiv.appendChild(div);
+
+                const opt = document.createElement('option');
+                opt.value = r.id;
+                opt.text = `${r.name} (GPIO ${r.gpio_pin})`;
+                scheduleRelaySelect.appendChild(opt);
+            });
+        }
+
+        function renderSchedules(list) {
+            schedulesList.innerHTML = '';
+            list.forEach(s => {
+                const li = document.createElement('li');
+                const startLocal = new Date(s.start_time).toLocaleString();
+                li.innerHTML = `#${s.id} Relay ${s.relay_id} start: ${startLocal} duration: ${s.duration_min}min — <strong>${s.status}</strong> `;
+                if (s.status === 'scheduled') {
+                    const cbtn = document.createElement('button');
+                    cbtn.innerText = 'Cancel';
+                    cbtn.onclick = () => fetch(`/api/schedules/${s.id}/cancel`, { method: 'POST' }).then(loadAll);
+                    li.appendChild(cbtn);
+                }
+                schedulesList.appendChild(li);
+            });
+        }
+
+        async function loadAll() {
+            const [relRes, schRes] = await Promise.all([fetch('/api/relays'), fetch('/api/schedules')]);
+            const rels = await relRes.json();
+            const schs = await schRes.json();
+            renderRelays(rels);
+            renderSchedules(schs);
+        }
+
+        document.getElementById('add-relay').onclick = async () => {
+            const name = document.getElementById('relay-name').value;
+            const gpio_pin = document.getElementById('relay-gpio').value;
+            if (!name || !gpio_pin) return alert('name & gpio required');
+            await fetch('/api/relays', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name, gpio_pin: Number(gpio_pin) }) });
+            document.getElementById('relay-name').value = '';
+            document.getElementById('relay-gpio').value = '';
+            loadAll();
+        };
+
+        document.getElementById('add-schedule').onclick = async () => {
+            const relay_id = scheduleRelaySelect.value;
+            const start = document.getElementById('schedule-start').value;
+            const duration_min = Number(document.getElementById('schedule-duration').value);
+            if (!relay_id || !start || !duration_min) return alert('all fields required');
+            const iso = new Date(start).toISOString();
+            await fetch('/api/schedules', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ relay_id: Number(relay_id), start_time: iso, duration_min }) });
+            loadAll();
+        };
+
+        socket.on('relays:update', data => { renderRelays(data); });
+        socket.on('schedules:update', data => { renderSchedules(data); });
+
+        loadAll();
+    </script>
+</body>
+
+</html>

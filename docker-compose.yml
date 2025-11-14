@@ -6,7 +6,7 @@ services:
     container_name: timer
     volumes:
       - .:/usr/src/app
-      # - /usr/src/app/node_modules
+      - /usr/src/app/node_modules
     ports:
       - "8008:8080"
     environment:
