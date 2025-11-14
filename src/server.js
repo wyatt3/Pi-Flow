@@ -1,7 +1,7 @@
 import http from 'http';
 import app from './app.js';
 import { initGPIO } from './services/gpioService.js';
-import { restoreSchedules } from './services/scheduleService.js';
+import { resetSchedules } from './services/scheduleService.js';
 import Ws from './services/websocketService.js';
 import * as Relay from './models/relay.js';
 
@@ -14,7 +14,7 @@ Ws.initSocket(server);
 initGPIO();
 
 // Restore schedules and wire updates to broadcasts
-restoreSchedules(() => {
+resetSchedules(() => {
     Ws.broadcastSchedules(require('./models/schedule.js').allSchedules());
     Ws.broadcastRelays(Relay.allRelays());
 });

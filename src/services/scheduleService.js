@@ -10,7 +10,7 @@ function msUntil(date) {
     return new Date(date).getTime() - Date.now();
 }
 
-export function restoreSchedules(onUpdate) {
+export function resetSchedules(onUpdate) {
     const rows = db.prepare("SELECT * FROM schedules WHERE status IN ('scheduled','running') ORDER BY start_time").all();
     rows.forEach(r => {
         // mark running schedules as scheduled so we reschedule properly

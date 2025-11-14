@@ -1,8 +1,6 @@
 import { Server as IOServer } from 'socket.io';
 
-
 let io = null;
-
 
 export function initSocket(server) {
     io = new IOServer(server, { cors: { origin: '*' } });

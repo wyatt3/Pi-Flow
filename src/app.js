@@ -1,6 +1,5 @@
 import express from 'express';
-import relayRoutes from './routes/relayRoutes.js';
-import scheduleRoutes from './routes/scheduleRoutes.js';
+import routes from './routes/api.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -11,8 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
-app.use('/api/relays', relayRoutes);
-app.use('/api/schedules', scheduleRoutes);
+app.use('/api', routes);
 
 // default route
 app.get('/', (req, res) => {
