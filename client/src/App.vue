@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import { io } from "socket.io-client";
 export default {
   name: "App",
 
@@ -31,34 +32,19 @@ export default {
 
   methods: {
     connectWs() {
-      this.socket = new WebSocket("ws://localhost:8080");
+      this.socket = io("http://localhost:8080");
 
-      this.socket.onopen = () => {
-        this.connected = true;
-      };
+      this.socket.on("connect", () => {
+        console.log("Connected:", this.socket.id);
+      });
 
-      this.socket.onclose = () => {
-        this.connected = false;
+      this.socket.on("relays:update", (relays) => {
+        console.log("Relays updated:", relays);
+      });
 
-        // Attempt reconnect after 2 seconds
-        setTimeout(() => this.connectWs(), 2000);
-      };
-
-      this.socket.onmessage = (msg) => {
-        try {
-          const data = JSON.parse(msg.data);
-
-          if (data.type === "relays") {
-            this.relays = data.relays;
-          }
-
-          if (data.type === "schedules") {
-            this.schedules = data.schedules;
-          }
-        } catch (e) {
-          console.error("Invalid WS message", e);
-        }
-      };
+      this.socket.on("schedules:update", (schedules) => {
+        console.log("Schedules updated:", schedules);
+      });
     },
     getRelays() {
       axios.get("/api/relays").then((response) => {
@@ -69,7 +55,7 @@ export default {
 
   mounted() {
     this.getRelays();
-    // this.connectWs();
+    this.connectWs();
   },
 
   beforeUnmount() {

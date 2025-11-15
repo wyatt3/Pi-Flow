@@ -1,17 +1,18 @@
 import http from 'http';
 import app from './app.js';
 import { resetSchedules } from './services/scheduleService.js';
-import Ws from './services/websocketService.js';
+import websocketService from './services/websocketService.js';
 
 const PORT = process.env.PORT || 8080;
 
 const server = http.createServer(app);
-Ws.initSocket(server);
+console.log(server);
+const wsService = new websocketService();
+wsService.initSocket(server);
 
-// Restore schedules and wire updates to broadcasts
 resetSchedules(() => {
-    Ws.broadcastSchedules(require('./models/schedule.js').allSchedules());
-    Ws.broadcastRelays(db.prepare('SELECT * FROM relays ORDER BY id').all());
+    // websocketService.broadcastSchedules(require('./models/schedule.js').allSchedules());
+    wsService.broadcastRelays(db.prepare('SELECT * FROM relays ORDER BY id').all());
 });
 
 server.listen(PORT, '0.0.0.0', () => {
