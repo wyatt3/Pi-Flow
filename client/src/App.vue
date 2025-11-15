@@ -4,6 +4,7 @@
     <header class="bg-white shadow mb-6">
       <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
         <h1 class="text-xl font-bold">Relay Controller</h1>
+        <div>test</div>
 
         <!-- Navigation -->
         <nav class="flex gap-4"></nav>
@@ -30,7 +31,7 @@ export default {
 
   methods: {
     connectWs() {
-      this.socket = new WebSocket("ws://localhost:3000");
+      this.socket = new WebSocket("ws://localhost:8080");
 
       this.socket.onopen = () => {
         this.connected = true;
@@ -67,7 +68,8 @@ export default {
   },
 
   mounted() {
-    this.connectWs();
+    this.getRelays();
+    // this.connectWs();
   },
 
   beforeUnmount() {
