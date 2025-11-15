@@ -4,9 +4,10 @@ import * as ScheduleController from '../controllers/scheduleController.js';
 
 const router = express.Router();
 
-router.get('/relay/', RelayController.getAll);
-router.post('/relay/', RelayController.create);
-// router.post('/relay/:id/:action(on|off)', RelayController.manualToggle);
+router.get('/relays/', RelayController.getAll);
+router.post('/relays/', RelayController.create);
+router.post('/relays/:id/', RelayController.update);
+router.delete('/relays/:id/', RelayController.delete);
 
 // router.get('/schedule/', ScheduleController.list);
 // router.post('/schedule/', ScheduleController.create);

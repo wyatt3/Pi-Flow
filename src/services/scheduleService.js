@@ -1,5 +1,5 @@
 import db from '../config/db.js';
-import { setRelayState } from './gpioService.js';
+// import { setRelayState } from './gpioService.js';
 
 
 // map scheduleId => { startTimer, stopTimer }

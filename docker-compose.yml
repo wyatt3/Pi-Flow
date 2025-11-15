@@ -3,12 +3,14 @@ services:
     build:
       context: .
       dockerfile: ./.docker/Dockerfile
+    privileged: true
     container_name: timer
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
-      - "8008:8080"
+      - "8080:8080"
+    user: "1000:1000"
     environment:
       - NODE_ENV=development
     command: [ "npm", "run", "dev" ]

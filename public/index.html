@@ -83,11 +83,11 @@
                 const onBtn = document.createElement('button');
                 onBtn.className = 'btn';
                 onBtn.innerText = 'On';
-                onBtn.onclick = () => fetch(`/api/relays/${r.id}/on`, { method: 'POST' }).then(loadAll);
+                onBtn.onclick = () => fetch(`/api/relays/${r.id}`, { method: 'POST' }).then(loadAll);
                 const offBtn = document.createElement('button');
                 offBtn.className = 'btn';
                 offBtn.innerText = 'Off';
-                offBtn.onclick = () => fetch(`/api/relays/${r.id}/off`, { method: 'POST' }).then(loadAll);
+                offBtn.onclick = () => fetch(`/api/relays/${r.id}`, { method: 'POST' }).then(loadAll);
                 controls.appendChild(onBtn);
                 controls.appendChild(offBtn);
                 div.appendChild(controls);
@@ -117,11 +117,11 @@
         }
 
         async function loadAll() {
-            const [relRes, schRes] = await Promise.all([fetch('/api/relays'), fetch('/api/schedules')]);
+            const [relRes] = await Promise.all([fetch('/api/relays')]);
             const rels = await relRes.json();
-            const schs = await schRes.json();
+            // const schs = await schRes.json();
             renderRelays(rels);
-            renderSchedules(schs);
+            // renderSchedules(schs);
         }
 
         document.getElementById('add-relay').onclick = async () => {
