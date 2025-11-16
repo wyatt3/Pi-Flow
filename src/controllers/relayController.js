@@ -5,7 +5,14 @@ import RelayService from '../services/relayService.js';
 export default class RelayController {
     static getAll(req, res) {
         const rows = db.prepare('SELECT * FROM relays ORDER BY id').all();
-        return res.json(rows.map(row => new Relay(row)));
+        const relays = rows.map((row) => {
+            try {
+                return new Relay(row)
+            } catch (err) {
+                return row
+            }
+        });
+        return res.json(relays);
     }
 
     static create(req, res) {
