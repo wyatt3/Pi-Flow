@@ -12,9 +12,7 @@
         "start": "node src/server.js"
     },
     "dependencies": {
-        "@vitejs/plugin-vue": "^6.0.1",
         "axios": "^1.13.2",
-        "better-sqlite3": "^8.0.0",
         "bootstrap": "^5.3.8",
         "bootstrap-icons": "^1.13.1",
         "dotenv": "^16.0.0",
@@ -22,10 +20,12 @@
         "onoff": "^6.0.0",
         "socket.io": "^4.7.2",
         "socket.io-client": "^4.8.1",
-        "vite": "^7.2.2",
-        "vue": "^3.5.24"
+        "vue": "^3.5.24",
+        "better-sqlite3": "^8.0.0"
     },
     "devDependencies": {
+        "vite": "^7.2.2",
+        "@vitejs/plugin-vue": "^6.0.1",
         "concurrently": "^9.2.1",
         "nodemon": "^3.1.11"
     }
