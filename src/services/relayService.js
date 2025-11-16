@@ -18,7 +18,10 @@ export default class RelayService {
             `UPDATE relays SET name = ?, gpio_pin = ?, active = ?
        WHERE id = ?`,
         ).run(name, gpio_pin, active, relay.id);
-        if (relay.gpio) relay.gpio.writeSync(active);
+        if (relay.gpio) {
+            console.log("RelayService: Updating relay: ", name, active);
+            relay.gpio.writeSync(active);
+        }
         websocketService.broadcastRelays();
         return relay;
     }
