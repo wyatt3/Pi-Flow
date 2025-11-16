@@ -18,8 +18,8 @@
             <button
               @click="toggleRelayActive(relay)"
               class="btn"
-              :class="relay.active ? 'btn-success' : 'btn-danger'"
-              v-text="relay.active ? 'ON' : 'OFF'"
+              :class="relay.active == 1 ? 'btn-danger' : 'btn-success'"
+              v-text="relay.active == 1 ? 'OFF' : 'ON'"
             ></button>
           </td>
           <td>
@@ -93,7 +93,7 @@ export default {
       });
     },
     toggleRelayActive(relay) {
-      relay.active = !relay.active;
+      relay.active = relay.active == 1 ? 0 : 1;
       axios.post(`/api/relays/${relay.id}`, relay);
     },
     deleteRelay(relay) {

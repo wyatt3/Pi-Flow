@@ -7,7 +7,7 @@ export default class RelayService {
     static create(name, gpio_pin) {
         const result = db.prepare(
             `INSERT INTO relays (name, gpio_pin, active)
-       VALUES (?, ?, 0)`
+       VALUES (?, ?, 1)`
         ).run(name, gpio_pin);
         websocketService.broadcastRelays();
         return new Relay({ id: result.lastInsertRowid, name, gpio_pin });

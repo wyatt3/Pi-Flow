@@ -7,6 +7,7 @@ class websocketService {
     }
 
     initSocket(server) {
+        console.log('Initializing socket');
         if (this.io) return this.io;
         this.io = new IOServer(server, { cors: { origin: '*' } });
         this.io.on('connection', socket => {
