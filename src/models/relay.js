@@ -37,6 +37,7 @@ export default class Relay {
         this.gpio_pin = gpio_pin;
         this.active = active;
         this.gpio = gpioEnabled ? new Gpio(Relay.pinToLineMap[this.gpio_pin], active ? 'out' : 'high') : null;
+        console.log('Created relay', this);
     }
 
     static get pinToLineMap() {

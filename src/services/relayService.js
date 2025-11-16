@@ -19,7 +19,8 @@ export default class RelayService {
        WHERE id = ?`,
         ).run(active, relay.id);
         relay.active = active;
-        relay.gpio.writeSync(active);
+        console.log('Saved relay', relay);
+        if (relay.gpio) relay.gpio.writeSync(active);
         websocketService.broadcastRelays();
         return relay;
     }

@@ -23,7 +23,7 @@
             ></button>
           </td>
           <td>
-            <button class="btn btn-danger bi bi-trash"></button>
+            <button class="btn btn-danger bi bi-trash" @click="deleteRelay(relay)"></button>
           </td>
         </tr>
       </tbody>
@@ -95,6 +95,9 @@ export default {
     toggleRelayActive(relay) {
       relay.active = !relay.active;
       axios.post(`/api/relays/${relay.id}`, relay);
+    },
+    deleteRelay(relay) {
+      axios.delete(`/api/relays/${relay.id}`);
     },
   },
 
