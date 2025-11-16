@@ -26,7 +26,7 @@ export default class RelayController {
         const { id } = req.params;
         const result = db.prepare('SELECT * FROM relays WHERE id = ?').get(id);
         let relay = new Relay(result);
-        relay = RelayService.save(relay, req.body.name, req.body.gpio_pin, Number(req.body.active));
+        relay = RelayService.save(relay, Number(req.body.active));
         res.json(relay);
     }
 

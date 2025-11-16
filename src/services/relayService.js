@@ -13,15 +13,13 @@ export default class RelayService {
         return new Relay({ id: result.lastInsertRowid, name, gpio_pin });
     }
 
-    static save(relay, name, gpio_pin, active) {
+    static save(relay, active) {
         db.prepare(
-            `UPDATE relays SET name = ?, gpio_pin = ?, active = ?
+            `UPDATE relays SET active = ?
        WHERE id = ?`,
-        ).run(name, gpio_pin, active, relay.id);
-        if (relay.gpio) {
-            console.log("RelayService: Updating relay: ", name, active);
-            relay.gpio.writeSync(active);
-        }
+        ).run(active, relay.id);
+        relay.active = active;
+        relay.gpio.writeSync(active);
         websocketService.broadcastRelays();
         return relay;
     }
@@ -37,7 +35,7 @@ export default class RelayService {
         const rows = db.prepare('SELECT * FROM relays').all();
         const relays = rows.map((row) => new Relay(row));
         relays.forEach((relay) => {
-            RelayService.save(relay, relay.name, relay.gpio_pin, 1);
+            RelayService.save(relay, 1);
         });
         websocketService.broadcastRelays();
     }
