@@ -16,13 +16,13 @@ class websocketService {
 
     broadcastRelays() {
         if (!this.io) return;
-        const relays = db.prepare('SELECT * FROM relays ORDER BY id').all();
+        const relays = db.prepare('SELECT * FROM relays ORDER BY name').all();
         this.io.emit('relays:update', relays);
     }
 
     broadcastSchedules() {
         if (!this.io) return;
-        const schedules = db.prepare('SELECT * FROM schedules ORDER BY id').all();
+        const schedules = db.prepare('SELECT * FROM schedules ORDER BY relay_id').all();
         this.io.emit('schedules:update', schedules);
     }
 }

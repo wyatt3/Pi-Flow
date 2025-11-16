@@ -4,7 +4,7 @@ import RelayService from '../services/relayService.js';
 
 export default class RelayController {
     static getAll(req, res) {
-        const rows = db.prepare('SELECT * FROM relays ORDER BY id').all();
+        const rows = db.prepare('SELECT * FROM relays ORDER BY name').all();
         const relays = rows.map((row) => {
             try {
                 return new Relay(row)
@@ -18,24 +18,36 @@ export default class RelayController {
     static create(req, res) {
         const { name, gpio_pin } = req.body;
         if (!name || gpio_pin == null) return res.status(400).json({ error: 'name & gpio_pin required' });
-        const relay = RelayService.create(name, gpio_pin);
-        res.json(relay);
+        try {
+            const relay = RelayService.create(name, gpio_pin);
+            return res.json(relay);
+        } catch (err) {
+            return res.status(400).json(err.message);
+        }
     }
 
     static update(req, res) {
         const { id } = req.params;
         const result = db.prepare('SELECT * FROM relays WHERE id = ?').get(id);
         let relay = new Relay(result);
-        relay = RelayService.save(relay, Number(req.body.active));
-        res.json(relay);
+        try {
+            relay = RelayService.save(relay, Number(req.body.active));
+            return res.json(relay);
+        } catch (err) {
+            return res.status(400).json(err.message);
+        }
     }
 
     static delete(req, res) {
         const { id } = req.params;
         const result = db.prepare('SELECT * FROM relays WHERE id = ?').get(id);
         const relay = new Relay(result);
-        RelayService.delete(relay);
-        res.json({ status: 'ok' });
+        try {
+            RelayService.delete(relay);
+            return res.json({ status: 'ok' });
+        } catch (err) {
+            return res.status(400).json(err.message);
+        }
     }
 
 }

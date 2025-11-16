@@ -29,21 +29,18 @@
       </tbody>
     </table>
 
-    <div class="d-flex gap-2">
-      <input
-        v-model="newRelayName"
-        type="text"
-        placeholder="Relay Name"
-        class="border border-gray-300 rounded px-2 py-1"
-      />
-      <input
-        v-model="newRelayGpioPin"
-        type="number"
-        placeholder="GPIO Pin"
-        class="border border-gray-300 rounded px-2 py-1"
-      />
-      <button @click="addRelay" class="btn btn-primary">Add Relay</button>
-    </div>
+    <h2>Add A Zone</h2>
+    <label>Name</label>
+    <input v-model="newRelayName" type="text" placeholder="Zone Name" class="form-control mb-2" />
+    <label>GPIO Pin</label>
+    <input v-model="newRelayGpioPin" type="number" placeholder="GPIO Pin" class="form-control mb-2" />
+    <button
+      @click="addRelay"
+      :disabled="!newRelayName || !newRelayGpioPin || addingRelay"
+      class="btn btn-success w-100"
+    >
+      <span v-if="!addingRelay">Add Relay</span><span v-else class="spinner-border"></span>
+    </button>
 
     <!-- Navigation -->
     <nav class="flex gap-4"></nav>
@@ -66,6 +63,7 @@ export default {
       socket: null,
       newRelayName: "",
       newRelayGpioPin: null,
+      addingRelay: false,
     };
   },
 
@@ -87,17 +85,35 @@ export default {
       });
     },
     addRelay() {
-      axios.post("/api/relays", {
-        name: this.newRelayName,
-        gpio_pin: this.newRelayGpioPin,
-      });
+      this.addingRelay = true;
+      axios
+        .post("/api/relays", {
+          name: this.newRelayName,
+          gpio_pin: this.newRelayGpioPin,
+        })
+        .then((response) => {
+          this.newRelayName = "";
+          this.newRelayGpioPin = null;
+          this.$toast.success("Zone added");
+        })
+        .catch((err) => {
+          this.$toast.error(err.response.data);
+        })
+        .finally(() => {
+          this.addingRelay = false;
+        });
     },
     toggleRelayActive(relay) {
       relay.active = relay.active == 1 ? 0 : 1;
-      axios.post(`/api/relays/${relay.id}`, relay);
+      axios.post(`/api/relays/${relay.id}`, relay).catch((err) => {
+        relay.active = relay.active == 1 ? 0 : 1;
+        this.$toast.error(err.response.data);
+      });
     },
     deleteRelay(relay) {
-      axios.delete(`/api/relays/${relay.id}`);
+      axios.delete(`/api/relays/${relay.id}`).then(() => {
+        this.$toast.success("Zone deleted");
+      });
     },
   },
 
