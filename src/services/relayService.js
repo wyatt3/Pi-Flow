@@ -10,7 +10,7 @@ export default class RelayService {
        VALUES (?, ?, 0)`
         ).run(name, gpio_pin);
         websocketService.broadcastRelays();
-        return new Relay(result);
+        return new Relay({ id: result.lastInsertRowid, name, gpio_pin });
     }
 
     static save(relay, name, gpio_pin, active) {
