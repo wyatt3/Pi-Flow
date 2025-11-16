@@ -5,6 +5,7 @@ import websocketService from '../services/websocketService.js';
 
 export default class RelayService {
     static create(name, gpio_pin) {
+        if (!(gpio_pin in Relay.pinToLineMap)) throw new Error('Invalid GPIO pin');
         const result = db.prepare(
             `INSERT INTO relays (name, gpio_pin, active)
        VALUES (?, ?, 1)`
