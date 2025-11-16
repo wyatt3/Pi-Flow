@@ -5,6 +5,7 @@ import routes from './routes/api.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
+import RelayService from './services/relayService.js';
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -29,4 +30,10 @@ websocketService.initSocket(server);
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server listening on http://0.0.0.0:${PORT}`);
+});
+
+// when the serer quits, shut off all relays
+process.on('SIGINT', () => {
+    RelayService.turnOffAllRelays();
+    process.exit(0);
 });

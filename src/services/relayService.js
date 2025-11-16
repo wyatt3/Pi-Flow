@@ -29,4 +29,13 @@ export default class RelayService {
         db.prepare(`DELETE FROM relays WHERE id = ?`).run(relay.id);
         websocketService.broadcastRelays();
     }
+
+    static turnOffAllRelays() {
+        const rows = db.prepare('SELECT * FROM relays').all();
+        const relays = rows.map((row) => new Relay(row));
+        relays.forEach((relay) => {
+            relay.save(relay, relay.name, relay.gpio_pin, 1);
+        });
+        websocketService.broadcastRelays();
+    }
 }
