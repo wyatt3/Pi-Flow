@@ -18,7 +18,7 @@ export default class RelayService {
             `UPDATE relays SET name = ?, gpio_pin = ?, active = ?
        WHERE id = ?`,
         ).run(name, gpio_pin, active, relay.id);
-        if (relay.gpio) relay.gpio.writeSync(!Boolean(relay.active));
+        if (relay.gpio) relay.gpio.writeSync(active);
         websocketService.broadcastRelays();
         return relay;
     }
@@ -34,7 +34,7 @@ export default class RelayService {
         const rows = db.prepare('SELECT * FROM relays').all();
         const relays = rows.map((row) => new Relay(row));
         relays.forEach((relay) => {
-            relay.save(relay, relay.name, relay.gpio_pin, 1);
+            RelayService.save(relay, relay.name, relay.gpio_pin, 1);
         });
         websocketService.broadcastRelays();
     }
