@@ -105,7 +105,7 @@ export default {
 
   methods: {
     connectWs() {
-      this.socket = io(`http://${window.location.hostname}:${import.meta.env.VITE_PORT}`);
+      this.socket = io(`http://${window.location.hostname}:${import.meta.env.VITE_WS_PORT}`);
 
       this.socket.on("relays:update", (relays) => {
         this.relays = relays;

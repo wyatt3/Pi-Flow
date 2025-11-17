@@ -45,9 +45,13 @@ export default class ScheduleService {
         const timezone = process.env.TIMEZONE;
         const currentTime = moment().tz(timezone);
         const currentDay = currentTime.day();
-        console.log('Running cron job at', currentTime.format('HH:mm'));
-        console.log('Current day is', currentDay);
         const result = db.prepare(`SELECT * FROM schedules WHERE start_time = ?`).all(currentTime.format('HH:mm'));
+        const schedules = result.map((schedule) => new Schedule(schedule));
+        schedules.forEach((schedule) => {
+            if (schedule.days.includes(currentDay)) {
+                ScheduleService.runSchedule(schedule);
+            }
+        });
     }
 
     static runSchedule(schedule) {

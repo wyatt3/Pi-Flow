@@ -9,8 +9,7 @@ router.post('/relays/', RelayController.create);
 router.post('/relays/:id/', RelayController.update);
 router.delete('/relays/:id/', RelayController.delete);
 
-// router.get('/schedule/', ScheduleController.list);
-// router.post('/schedule/', ScheduleController.create);
+router.post('/schedule/', ScheduleController.create);
 // router.post('/schedule/:id/cancel', ScheduleController.cancel);
 
 export default router;
