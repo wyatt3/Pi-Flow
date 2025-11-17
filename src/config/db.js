@@ -24,7 +24,8 @@ relay_id INTEGER NOT NULL,
 start_time TIME NOT NULL,
 duration_min INTEGER NOT NULL,
 one_time BOOLEAN DEFAULT 0,
-status TEXT NOT NULL DEFAULT 'scheduled',
+status TEXT NOT NULL DEFAULT 'idle',
+skip_next BOOLEAN DEFAULT 0,
 FOREIGN KEY(relay_id) REFERENCES relays(id)
 );
 

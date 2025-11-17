@@ -1,11 +1,14 @@
-import http from 'http';
-import websocketService from './services/websocketService.js';
-import express from 'express';
-import routes from './routes/api.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import cron from 'node-cron';
 import dotenv from 'dotenv';
+import express from 'express';
+import { fileURLToPath } from 'url';
+import http from 'http';
+import path from 'path';
 import RelayService from './services/relayService.js';
+import ScheduleService from './services/scheduleService.js';
+import routes from './routes/api.js';
+import websocketService from './services/websocketService.js';
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,4 +33,8 @@ server.listen(PORT, '0.0.0.0', () => {
 process.on('SIGINT', () => {
     RelayService.turnOffAllRelays();
     process.exit(0);
+});
+
+cron.schedule('* * * * *', async () => {
+    ScheduleService.runSchedules();
 });

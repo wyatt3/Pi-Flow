@@ -1,4 +1,5 @@
 import { Gpio } from 'onoff';
+import db from '../config/db.js';
 
 const pinToLineMap = {
     2: 514,
@@ -37,6 +38,8 @@ export default class Relay {
         this.gpio_pin = gpio_pin;
         this.active = active;
         this.gpio = gpioEnabled ? new Gpio(Relay.pinToLineMap[this.gpio_pin], active == 0 ? 'out' : 'high') : null;
+        const result = db.prepare('SELECT * FROM schedules WHERE relay_id = ?').all(this.id);
+        this.schedules = result.map((schedule) => new Schedule(schedule));
     }
 
     static get pinToLineMap() {

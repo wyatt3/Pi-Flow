@@ -6,6 +6,7 @@
         <tr>
           <th>Name</th>
           <th>GPIO Pin</th>
+          <th>Schedule</th>
           <th>Status</th>
           <th></th>
         </tr>
@@ -14,6 +15,9 @@
         <tr v-for="relay in relays" :key="relay.id">
           <td>{{ relay.name }}</td>
           <td>{{ relay.gpio_pin }}</td>
+          <td>
+            <button class="btn btn-info" @click="selectedRelay = relay"><i class="bi bi-clock"></i></button>
+          </td>
           <td>
             <button
               @click="toggleRelayActive(relay)"
@@ -28,6 +32,35 @@
         </tr>
       </tbody>
     </table>
+
+    <modal :open="selectedRelay" @toggle="selectedRelay = null">
+      <h1>Schedules</h1>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Start Time</th>
+            <th>Duration</th>
+            <th>Status</th>
+            <th>One-Off</th>
+            <th></th>
+            <th></th>
+            <th></th>
+          </tr>
+          <tr v-for="schedule in selectedRelay.schedules" :key="schedule.id">
+            <td>{{ schedule.start_time }}</td>
+            <td>{{ schedule.duration_min }} minutes</td>
+            <td>{{ schedule.status }}</td>
+            <td>{{ schedule.one_time == 1 ? "Yes" : "No" }}</td>
+            <td>{{ schedule.skip_next == 1 ? "Yes" : "No" }}</td>
+            <td><button class="btn btn-warning bi bi-pencil" @click="editSchedule(schedule)"></button></td>
+            <td><button class="btn btn-danger bi bi-trash" @click="deleteSchedule(schedule)"></button></td>
+          </tr>
+          <tr v-if="!selectedRelay.schedules <= 0">
+            <td colspan="7" class="text-center">No schedules</td>
+          </tr>
+        </thead>
+      </table>
+    </modal>
 
     <h2>Add A Zone</h2>
     <label>Name</label>
@@ -52,7 +85,9 @@
 
 <script>
 import { io } from "socket.io-client";
+import Modal from "./components/Modal.vue";
 export default {
+  components: { Modal },
   name: "App",
 
   data() {
@@ -64,6 +99,7 @@ export default {
       newRelayName: "",
       newRelayGpioPin: null,
       addingRelay: false,
+      selectedRelay: null,
     };
   },
 
