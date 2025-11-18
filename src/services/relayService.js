@@ -10,7 +10,7 @@ export default class RelayService {
             `INSERT INTO relays (name, gpio_pin, active)
        VALUES (?, ?, 1)`
         ).run(name, gpio_pin);
-        websocketService.broadcastRelays();
+        websocketService.broadcastUpdate();
         return new Relay({ id: result.lastInsertRowid, name, gpio_pin });
     }
 
@@ -21,7 +21,7 @@ export default class RelayService {
         ).run(active, relay.id);
         relay.active = active;
         if (relay.gpio) relay.gpio.writeSync(active);
-        websocketService.broadcastRelays();
+        websocketService.broadcastUpdate();
         return relay;
     }
 
@@ -29,7 +29,7 @@ export default class RelayService {
         if (relay.gpio) relay.gpio.writeSync(1);
         // delete schedules
         db.prepare(`DELETE FROM relays WHERE id = ?`).run(relay.id);
-        websocketService.broadcastRelays();
+        websocketService.broadcastUpdate();
     }
 
     static turnOffAllRelays() {
@@ -38,6 +38,6 @@ export default class RelayService {
         relays.forEach((relay) => {
             RelayService.save(relay, 1);
         });
-        websocketService.broadcastRelays();
+        websocketService.broadcastUpdate();
     }
 }

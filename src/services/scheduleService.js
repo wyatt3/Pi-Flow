@@ -2,6 +2,7 @@ import db from '../config/db.js';
 import moment from 'moment-timezone';
 import Relay from '../models/relay.js';
 import Schedule from '../models/schedule.js';
+import websocketService from '../services/websocketService.js';
 
 export default class ScheduleService {
     static createSchedule(relay, start_time, duration_min, one_time, days) {
@@ -11,12 +12,23 @@ export default class ScheduleService {
         ).run(relay.id, start_time, duration_min, one_time);
         const schedule = new Schedule({ id: result.lastInsertRowid, relay_id: relay.id, start_time, duration_min, one_time, status: 'scheduled' });
         ScheduleService.setDays(schedule, days);
+        websocketService.broadcastUpdate();
         return schedule;
     }
 
-    static updateSchedule(schedule, relay, start_time, duration_min, one_time, days) { }
+    static updateSchedule(schedule, start_time, duration_min, one_time, days) {
+        db.prepare(
+            `UPDATE schedules SET start_time = ?, duration_min = ?, one_time = ? WHERE id = ?`
+        ).run(start_time, duration_min, one_time, schedule.id);
+        ScheduleService.setDays(schedule, days);
+        websocketService.broadcastUpdate();
+        return schedule;
+    }
 
     static setDays(schedule, days) {
+        db.prepare(
+            `DELETE FROM schedule_days WHERE schedule_id = ?`
+        ).run(schedule.id);
         days.foreach((day) => {
             db.prepare(
                 `INSERT INTO schedule_days (schedule_id, day)
@@ -33,12 +45,14 @@ export default class ScheduleService {
         db.prepare(
             `DELETE FROM schedule_days WHERE schedule_id = ?`
         ).run(schedule.id);
+        websocketService.broadcastUpdate();
     }
 
     static skipNextOccurrence(schedule) {
         db.prepare(
             `UPDATE schedules SET skip_next = 1 WHERE id = ?`
         ).run(schedule.id);
+        websocketService.broadcastUpdate();
     }
 
     static runSchedules() {
@@ -52,6 +66,7 @@ export default class ScheduleService {
                 ScheduleService.runSchedule(schedule);
             }
         });
+        websocketService.broadcastUpdate();
     }
 
     static runSchedule(schedule) {
