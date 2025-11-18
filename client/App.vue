@@ -46,15 +46,33 @@
             <th></th>
             <th></th>
           </tr>
-          <tr v-for="schedule in selectedRelay.schedules" :key="schedule.id">
-            <td>{{ schedule.start_time }}</td>
-            <td>{{ schedule.duration_min }} minutes</td>
-            <td>{{ schedule.status }}</td>
-            <td>{{ schedule.one_time == 1 ? "Yes" : "No" }}</td>
-            <td>{{ schedule.skip_next == 1 ? "Yes" : "No" }}</td>
-            <td><button class="btn btn-warning bi bi-pencil" @click="editSchedule(schedule)"></button></td>
-            <td><button class="btn btn-danger bi bi-trash" @click="deleteSchedule(schedule)"></button></td>
-          </tr>
+          <template v-for="schedule in selectedRelay.schedules" :key="schedule.id">
+            <tr v-if="schedule.editing">
+              <td><input type="time" v-model="schedule.start_time" class="form-control" /></td>
+              <td>
+                <div class="input-group">
+                  <input type="number" v-model="schedule.duration_min" class="form-control" /><span
+                    class="input-group-text"
+                    >minutes</span
+                  >
+                </div>
+              </td>
+              <td>{{ schedule.status }}</td>
+              <td><input type="checkbox" v-model="schedule.one_time" /></td>
+              <td><input type="checkbox" v-model="schedule.skip_next" /></td>
+              <td><button class="btn btn-success bi bi-check" @click="saveSchedule(schedule)"></button></td>
+              <td><button class="btn btn-danger bi bi-x" @click="schedule.editing = false"></button></td>
+            </tr>
+            <tr v-else>
+              <td>{{ schedule.start_time }}</td>
+              <td>{{ schedule.duration_min }} minutes</td>
+              <td>{{ schedule.status }}</td>
+              <td>{{ schedule.one_time == 1 ? "Yes" : "No" }}</td>
+              <td>{{ schedule.skip_next == 1 ? "Yes" : "No" }}</td>
+              <td><button class="btn btn-warning bi bi-pencil" @click="editSchedule(schedule)"></button></td>
+              <td><button class="btn btn-danger bi bi-trash" @click="deleteSchedule(schedule)"></button></td>
+            </tr>
+          </template>
           <tr v-if="!selectedRelay.schedules <= 0">
             <td colspan="7" class="text-center">No schedules</td>
           </tr>
