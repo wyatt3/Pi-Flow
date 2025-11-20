@@ -1,5 +1,6 @@
-import { Server as IOServer } from 'socket.io';
 import db from '../config/db.js';
+import Relay from '../models/relay.js';
+import { Server as IOServer } from 'socket.io';
 
 class websocketService {
     constructor() {

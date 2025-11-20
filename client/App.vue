@@ -38,43 +38,62 @@
       <table class="table">
         <thead>
           <tr>
+            <th>Skip Next Occurrence</th>
             <th>Start Time</th>
             <th>Duration</th>
             <th>Status</th>
             <th>One-Off</th>
             <th></th>
             <th></th>
-            <th></th>
           </tr>
           <template v-for="schedule in selectedRelay.schedules" :key="schedule.id">
             <tr v-if="schedule.editing">
+              <td><input type="checkbox" v-model="schedule.skip_next" /></td>
               <td><input type="time" v-model="schedule.start_time" class="form-control" /></td>
               <td>
                 <div class="input-group">
-                  <input type="number" v-model="schedule.duration_min" class="form-control" /><span
+                  <input type="number" v-model="schedule.duration_min" min="0" class="form-control" /><span
                     class="input-group-text"
                     >minutes</span
                   >
                 </div>
               </td>
               <td>{{ schedule.status }}</td>
-              <td><input type="checkbox" v-model="schedule.one_time" /></td>
-              <td><input type="checkbox" v-model="schedule.skip_next" /></td>
+              <td class="text-center"><input type="checkbox" v-model="schedule.one_time" /></td>
               <td><button class="btn btn-success bi bi-check" @click="saveSchedule(schedule)"></button></td>
               <td><button class="btn btn-danger bi bi-x" @click="schedule.editing = false"></button></td>
             </tr>
             <tr v-else>
+              <td><input type="checkbox" v-model="schedule.skip_next" @change="skipNextOccurrence(schedule)" /></td>
               <td>{{ schedule.start_time }}</td>
               <td>{{ schedule.duration_min }} minutes</td>
               <td>{{ schedule.status }}</td>
-              <td>{{ schedule.one_time == 1 ? "Yes" : "No" }}</td>
-              <td>{{ schedule.skip_next == 1 ? "Yes" : "No" }}</td>
+              <td class="text-center">{{ schedule.one_time == 1 ? "Yes" : "No" }}</td>
               <td><button class="btn btn-warning bi bi-pencil" @click="editSchedule(schedule)"></button></td>
               <td><button class="btn btn-danger bi bi-trash" @click="deleteSchedule(schedule)"></button></td>
             </tr>
           </template>
-          <tr v-if="!selectedRelay.schedules <= 0">
-            <td colspan="7" class="text-center">No schedules</td>
+          <tr v-if="addingSchedule">
+            <td></td>
+            <td><input type="time" v-model="newSchedule.start_time" class="form-control" /></td>
+            <td>
+              <div class="input-group">
+                <input type="number" v-model="newSchedule.duration_min" min="0" class="form-control" /><span
+                  class="input-group-text"
+                  >minutes</span
+                >
+              </div>
+            </td>
+            <td>Idle</td>
+            <td class="text-center"><input type="checkbox" v-model="newSchedule.one_time" /></td>
+            <td><button class="btn btn-success bi bi-check" @click="createSchedule"></button></td>
+            <td>
+              <button class="btn btn-danger bi bi-x" @click="resetNewSchedule"></button>
+            </td>
+          </tr>
+          <tr v-else>
+            <td colspan="4"></td>
+            <td colspan="3"><button class="btn btn-info bi bi-plus" @click="addingSchedule = true"></button></td>
           </tr>
         </thead>
       </table>
@@ -92,12 +111,6 @@
     >
       <span v-if="!addingRelay">Add Relay</span><span v-else class="spinner-border"></span>
     </button>
-
-    <!-- Navigation -->
-    <nav class="flex gap-4"></nav>
-
-    <!-- MAIN CONTENT -->
-    <main class="max-w-5xl mx-auto px-4"></main>
   </div>
 </template>
 
@@ -118,6 +131,12 @@ export default {
       newRelayGpioPin: null,
       addingRelay: false,
       selectedRelay: null,
+      addingSchedule: false,
+      newSchedule: {
+        start_time: null,
+        duration_min: null,
+        one_time: false,
+      },
     };
   },
 
@@ -165,6 +184,18 @@ export default {
         this.$toast.success("Zone deleted");
       });
     },
+
+    createSchedule() {
+      axios.post(`/api/schedules`, this.newSchedule).then(() => {
+        this.newSchedule = {
+          start_time: null,
+          duration_min: null,
+          one_time: false,
+        };
+        this.addingSchedule = false;
+        this.$toast.success("Schedule created");
+      });
+    },
   },
 
   mounted() {
@@ -182,5 +213,9 @@ export default {
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
+}
+
+td {
+  vertical-align: middle;
 }
 </style>
