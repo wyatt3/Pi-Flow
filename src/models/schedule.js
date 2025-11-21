@@ -9,6 +9,6 @@ export default class Schedule {
         this.one_time = one_time;
         this.status = status;
         this.skip_next = skip_next;
-        this.days = db.prepare('SELECT day FROM schedule_days WHERE schedule_id = ?').all(this.id);
+        this.days = db.prepare('SELECT day FROM schedule_days WHERE schedule_id = ?').all(this.id).map((row) => row.day);
     }
 }

@@ -3,23 +3,24 @@ import moment from 'moment-timezone';
 import Relay from '../models/relay.js';
 import Schedule from '../models/schedule.js';
 import websocketService from '../services/websocketService.js';
+import RelayService from './relayService.js';
 
 export default class ScheduleService {
     static createSchedule(relay, start_time, duration_min, one_time, days) {
         const result = db.prepare(
             `INSERT INTO schedules (relay_id, start_time, duration_min, one_time)
             VALUES (?, ?, ?, ?)`
-        ).run(relay.id, start_time, duration_min, one_time);
-        const schedule = new Schedule({ id: result.lastInsertRowid, relay_id: relay.id, start_time, duration_min, one_time, status: 'scheduled' });
+        ).run(relay.id, start_time, duration_min, Number(one_time));
+        const schedule = new Schedule({ id: result.lastInsertRowid, relay_id: relay.id, start_time: start_time, duration_min: duration_min, one_time: one_time, status: 'scheduled' });
         ScheduleService.setDays(schedule, days);
         websocketService.broadcastUpdate();
         return schedule;
     }
 
-    static updateSchedule(schedule, start_time, duration_min, one_time, days) {
+    static updateSchedule(schedule, start_time, duration_min, one_time, skip_next, days) {
         db.prepare(
-            `UPDATE schedules SET start_time = ?, duration_min = ?, one_time = ? WHERE id = ?`
-        ).run(start_time, duration_min, one_time, schedule.id);
+            `UPDATE schedules SET start_time = ?, duration_min = ?, one_time = ?, skip_next = ? WHERE id = ?`
+        ).run(start_time, duration_min, Number(one_time), Number(skip_next), schedule.id);
         ScheduleService.setDays(schedule, days);
         websocketService.broadcastUpdate();
         return schedule;
@@ -29,7 +30,7 @@ export default class ScheduleService {
         db.prepare(
             `DELETE FROM schedule_days WHERE schedule_id = ?`
         ).run(schedule.id);
-        days.foreach((day) => {
+        days.forEach((day) => {
             db.prepare(
                 `INSERT INTO schedule_days (schedule_id, day)
                 VALUES (?, ?)`
@@ -53,6 +54,7 @@ export default class ScheduleService {
             `UPDATE schedules SET skip_next = 1 WHERE id = ?`
         ).run(schedule.id);
         websocketService.broadcastUpdate();
+        return schedule;
     }
 
     static runSchedules() {
@@ -62,6 +64,7 @@ export default class ScheduleService {
         const result = db.prepare(`SELECT * FROM schedules WHERE start_time = ?`).all(currentTime.format('HH:mm'));
         const schedules = result.map((schedule) => new Schedule(schedule));
         schedules.forEach((schedule) => {
+            console.log(`[${currentTime.format('YYYY-MM-DD HH:mm')}] Running schedule: ${schedule.id} for ${schedule.duration_min} minute${schedule.duration_min > 1 ? 's' : ''}`);
             if (schedule.days.includes(currentDay)) {
                 ScheduleService.runSchedule(schedule);
             }
@@ -70,20 +73,39 @@ export default class ScheduleService {
     }
 
     static runSchedule(schedule) {
+        if (schedule.skip_next) {
+            console.log(`Schedule: ${schedule.id} is set to skip the next occurrence, skipping`);
+            ScheduleService.updateSchedule(schedule, schedule.start_time, schedule.duration_min, schedule.one_time, 0, schedule.days);
+            return;
+        }
+
         const result = db.prepare(
             `SELECT * FROM relays WHERE id = ?`
         ).run(schedule.relay_id);
         const relay = new Relay(result);
         RelayService.save(relay, 0);
+        console.log(`Activated GPIO Pin: ${relay.gpio_pin}`);
+
         db.prepare(
             `UPDATE schedules SET status = ? WHERE id = ?`
         ).run('running', schedule.id);
+        websocketService.broadcastUpdate();
+
         const timeout = schedule.duration_min * 60 * 1000;
         setTimeout(() => {
+            console.log(`[${moment().tz(process.env.TIMEZONE).format('YYYY-MM-DD HH:mm')}] Schedule: ${schedule.id} complete`);
             RelayService.save(relay, 1);
+            console.log(`Deactivated GPIO Pin: ${relay.gpio_pin}`);
+
             db.prepare(
                 `UPDATE schedules SET status = ? WHERE id = ?`
             ).run('idle', schedule.id);
+
+            if (schedule.one_time) {
+                console.log(`Schedule: ${schedule.id} is one-time, deleting`);
+                ScheduleService.deleteSchedule(schedule);
+            }
+            websocketService.broadcastUpdate();
         }, timeout);
     }
 }

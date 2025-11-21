@@ -7,7 +7,7 @@ export default class ScheduleController {
     static create(req, res) {
         const { relay_id, start_time, duration_min, one_time, days } = req.body;
 
-        if (!relay_id || !start_time || !duration_min || !one_time || !days) {
+        if (!relay_id || !start_time || !duration_min || one_time === null || !days) {
             return res.status(400).json({ error: 'relay_id, start_time, duration_min, one_time, days required' });
         }
         const result = db.prepare('SELECT * FROM relays WHERE id = ?').get(relay_id);
@@ -22,19 +22,17 @@ export default class ScheduleController {
         } catch (err) {
             return res.status(400).json(err.message);
         }
-
-
     }
 
     static update(req, res) {
         const { id } = req.params;
-        const { start_time, duration_min, one_time, days } = req.body;
+        const { start_time, duration_min, one_time, skip_next, days } = req.body;
 
         const result = db.prepare('SELECT * FROM schedules WHERE id = ?').get(id);
         const schedule = new Schedule(result);
         try {
-            ScheduleService.updateSchedule(schedule, start_time, duration_min, one_time, days);
-            return res.status(200);
+            ScheduleService.updateSchedule(schedule, start_time, duration_min, one_time, skip_next, days);
+            return res.status(200).json(schedule);
         } catch (err) {
             return res.status(400).json(err.message);
         }
@@ -46,7 +44,7 @@ export default class ScheduleController {
         const schedule = new Schedule(result);
         try {
             ScheduleService.deleteSchedule(schedule);
-            return res.status(204);
+            return res.status(204).json();
         } catch (err) {
             return res.status(400).json(err.message);
         }

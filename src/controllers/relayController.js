@@ -20,7 +20,7 @@ export default class RelayController {
         if (!name || gpio_pin == null) return res.status(400).json({ error: 'name & gpio_pin required' });
         try {
             const relay = RelayService.create(name, gpio_pin);
-            return res.json(relay);
+            return res.status(201).json(relay);
         } catch (err) {
             return res.status(400).json(err.message);
         }
@@ -32,7 +32,7 @@ export default class RelayController {
         let relay = new Relay(result);
         try {
             relay = RelayService.save(relay, Number(req.body.active));
-            return res.json(relay);
+            return res.status(200).json(relay);
         } catch (err) {
             return res.status(400).json(err.message);
         }
@@ -44,7 +44,7 @@ export default class RelayController {
         const relay = new Relay(result);
         try {
             RelayService.delete(relay);
-            return res.json({ status: 'ok' });
+            return res.status(204).json();
         } catch (err) {
             return res.status(400).json(err.message);
         }

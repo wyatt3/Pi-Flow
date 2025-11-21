@@ -26,14 +26,14 @@ duration_min INTEGER NOT NULL,
 one_time BOOLEAN DEFAULT 0,
 status TEXT NOT NULL DEFAULT 'idle',
 skip_next BOOLEAN DEFAULT 0,
-FOREIGN KEY(relay_id) REFERENCES relays(id)
+FOREIGN KEY(relay_id) REFERENCES relays(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS schedule_days (
 id INTEGER PRIMARY KEY AUTOINCREMENT,
 schedule_id INTEGER NOT NULL,
 day INTEGER NOT NULL,
-FOREIGN KEY(schedule_id) REFERENCES schedules(id)
+FOREIGN KEY(schedule_id) REFERENCES schedules(id) ON DELETE CASCADE
 );
 `);
 
