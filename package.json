@@ -12,6 +12,7 @@
         "start": "node src/server.js"
     },
     "dependencies": {
+        "@vueform/toggle": "^2.1.4",
         "axios": "^1.13.2",
         "better-sqlite3": "^8.0.0",
         "bootstrap": "^5.3.8",

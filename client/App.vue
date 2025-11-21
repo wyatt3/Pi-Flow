@@ -115,8 +115,9 @@
           </div>
         </div>
         <div class="mb-2">
-          <label class="fw-bold me-2">One-Off: </label>
-          <input v-model="newSchedule.one_time" type="checkbox" class="form-check-input" />
+          <label class="fw-bold">Type: </label>
+          <br />
+          <Toggle v-model="newSchedule.one_time" offLabel="Recurring" onLabel="One-Off" />
         </div>
         <div class="d-flex gap-2">
           <button class="btn btn-danger w-50" @click="resetNewSchedule">Cancel</button>
@@ -138,10 +139,12 @@
 import { io } from "socket.io-client";
 import Countdown from "./components/Countdown.vue";
 import Modal from "./components/Modal.vue";
+import Toggle from "@vueform/toggle";
 export default {
   components: {
     Countdown,
     Modal,
+    Toggle,
   },
   name: "App",
 
