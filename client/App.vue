@@ -35,68 +35,45 @@
 
     <modal :open="selectedRelay" @toggle="selectedRelay = null">
       <h1>Schedules</h1>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Skip Next Occurrence</th>
-            <th>Start Time</th>
-            <th>Duration</th>
-            <th>Status</th>
-            <th>One-Off</th>
-            <th></th>
-            <th></th>
-          </tr>
-          <template v-for="schedule in selectedRelay.schedules" :key="schedule.id">
-            <tr v-if="schedule.editing">
-              <td><input type="checkbox" v-model="schedule.skip_next" /></td>
-              <td><input type="time" v-model="schedule.start_time" class="form-control" /></td>
-              <td>
-                <div class="input-group">
-                  <input type="number" v-model="schedule.duration_min" min="0" class="form-control" /><span
-                    class="input-group-text"
-                    >minutes</span
-                  >
-                </div>
-              </td>
-              <td>{{ schedule.status }}</td>
-              <td class="text-center"><input type="checkbox" v-model="schedule.one_time" /></td>
-              <td><button class="btn btn-success bi bi-check" @click="saveSchedule(schedule)"></button></td>
-              <td><button class="btn btn-danger bi bi-x" @click="schedule.editing = false"></button></td>
-            </tr>
-            <tr v-else>
-              <td><input type="checkbox" v-model="schedule.skip_next" @change="skipNextOccurrence(schedule)" /></td>
-              <td>{{ schedule.start_time }}</td>
-              <td>{{ schedule.duration_min }} minutes</td>
-              <td>{{ schedule.status }}</td>
-              <td class="text-center">{{ schedule.one_time == 1 ? "Yes" : "No" }}</td>
-              <td><button class="btn btn-warning bi bi-pencil" @click="editSchedule(schedule)"></button></td>
-              <td><button class="btn btn-danger bi bi-trash" @click="deleteSchedule(schedule)"></button></td>
-            </tr>
-          </template>
-          <tr v-if="addingSchedule">
-            <td></td>
-            <td><input type="time" v-model="newSchedule.start_time" class="form-control" /></td>
-            <td>
-              <div class="input-group">
-                <input type="number" v-model="newSchedule.duration_min" min="0" class="form-control" /><span
-                  class="input-group-text"
-                  >minutes</span
-                >
+      <div class="schedule" v-for="schedule in selectedRelay.schedules" :key="schedule.id">
+        <div class="d-flex">
+          <div class="w-50">
+            <div>
+              <label class="fw-bold me-2">Start Time: </label>
+              <span>{{ convertTime(schedule.start_time) }}</span>
+            </div>
+            <div class="d-flex">
+              <label class="fw-bold me-2">Days: </label>
+              <div class="d-flex gap-2">
+                <span
+                  class="day-box"
+                  :class="{ 'bg-info': schedule.days.includes(day) }"
+                  v-for="day in dayNames"
+                  :key="day"
+                  >{{ day }}
+                </span>
               </div>
-            </td>
-            <td>Idle</td>
-            <td class="text-center"><input type="checkbox" v-model="newSchedule.one_time" /></td>
-            <td><button class="btn btn-success bi bi-check" @click="createSchedule"></button></td>
-            <td>
-              <button class="btn btn-danger bi bi-x" @click="resetNewSchedule"></button>
-            </td>
-          </tr>
-          <tr v-else>
-            <td colspan="4"></td>
-            <td colspan="3"><button class="btn btn-info bi bi-plus" @click="addingSchedule = true"></button></td>
-          </tr>
-        </thead>
-      </table>
+            </div>
+          </div>
+          <div class="w-50">
+            <div>
+              <label class="fw-bold me-2">Duration: </label>
+              <span>{{ schedule.duration_min }} minute{{ schedule.duration_min > 1 ? "s" : "" }}</span>
+            </div>
+            <div>
+              <label class="fw-bold me-2">One-Off: </label>
+              <span>{{ schedule.one_time ? "Yes" : "No" }}</span>
+            </div>
+          </div>
+        </div>
+        <button
+          @click="toggleSkipNext(schedule)"
+          class="w-100 mt-3 btn btn-warning"
+          :class="{ 'btn-danger': schedule.skip_next }"
+        >
+          {{ schedule.skip_next ? "Unskip Next Occurrence" : "Skip Next Occurrence" }}
+        </button>
+      </div>
     </modal>
 
     <h2>Add A Zone</h2>
@@ -137,6 +114,7 @@ export default {
         duration_min: null,
         one_time: false,
       },
+      dayNames: ["S", "M", "T", "W", "T", "F", "S"],
     };
   },
 
@@ -186,15 +164,26 @@ export default {
     },
 
     createSchedule() {
-      axios.post(`/api/schedules`, this.newSchedule).then(() => {
-        this.newSchedule = {
-          start_time: null,
-          duration_min: null,
-          one_time: false,
-        };
-        this.addingSchedule = false;
-        this.$toast.success("Schedule created");
-      });
+      axios
+        .post(`/api/schedules`, {
+          relay_id: this.selectedRelay.id,
+          days: [0, 1, 2, 3, 4, 5, 6],
+          ...this.newSchedule,
+        })
+        .then(() => {
+          this.newSchedule = {
+            start_time: null,
+            duration_min: null,
+            one_time: false,
+          };
+          this.addingSchedule = false;
+          this.$toast.success("Schedule created");
+        });
+    },
+
+    convertTime(time) {
+      const [H, M] = time.split(":");
+      return `${H % 12}:${M} ${H < 12 ? "AM" : "PM"}`;
     },
   },
 
@@ -217,5 +206,10 @@ body {
 
 td {
   vertical-align: middle;
+}
+.day-box {
+  width: 24px;
+  border-radius: 5px;
+  text-align: center;
 }
 </style>

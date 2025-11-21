@@ -5,15 +5,25 @@ import ScheduleService from '../services/scheduleService.js';
 
 export default class ScheduleController {
     static create(req, res) {
-        const { relay_id, start_time, duration_min, one_time } = req.body;
+        const { relay_id, start_time, duration_min, one_time, days } = req.body;
 
-        if (!relay_id || !start_time || !duration_min) {
-            return res.status(400).json({ error: 'relay_id, start_time, duration_min required' });
+        if (!relay_id || !start_time || !duration_min || !one_time || !days) {
+            return res.status(400).json({ error: 'relay_id, start_time, duration_min, one_time, days required' });
         }
-
         const result = db.prepare('SELECT * FROM relays WHERE id = ?').get(relay_id);
         const relay = new Relay(result);
-        if (!relay) return res.status(400).json({ error: 'invalid relay_id' });
+        if (!relay) {
+            return res.status(400).json({ error: 'invalid relay_id' });
+        }
+
+        try {
+            const schedule = ScheduleService.createSchedule(relay, start_time, duration_min, one_time, days);
+            return res.status(201).json(schedule);
+        } catch (err) {
+            return res.status(400).json(err.message);
+        }
+
+
     }
 
     static update(req, res) {

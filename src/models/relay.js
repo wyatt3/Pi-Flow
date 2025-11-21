@@ -1,5 +1,6 @@
 import { Gpio } from 'onoff';
 import db from '../config/db.js';
+import Schedule from './schedule.js';
 
 const pinToLineMap = {
     2: 514,
