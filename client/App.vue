@@ -74,16 +74,16 @@
             <span>{{ schedule.one_time ? "Yes" : "No" }}</span>
           </div>
           <div class="schedule-item">
-            <label class="fw-bold me-2">Status: </label>
-            <span
-              class="px-2 py-1 rounded text-uppercase"
-              :class="{
-                'bg-warning': schedule.status == 'running',
-                'bg-success': schedule.status == 'idle',
-                'text-white': schedule.status == 'idle',
-              }"
-              >{{ schedule.status }}</span
-            >
+            <label class="fw-bold me-2">Status:</label>
+
+            <span v-if="schedule.status !== 'running'" class="px-2 py-1 rounded text-uppercase bg-success text-white">
+              {{ schedule.status }}
+            </span>
+
+            <span v-else class="px-2 py-1 rounded text-uppercase bg-warning">
+              Running -
+              <Countdown :startTime="schedule.start_time" :durationMin="schedule.duration_min" />
+            </span>
           </div>
         </div>
         <button

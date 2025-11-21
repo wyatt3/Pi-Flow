@@ -5,7 +5,7 @@
 <script>
 export default {
   props: {
-    startTimestamp: Number,
+    startTime: String,
     durationMin: Number,
   },
 
@@ -26,9 +26,16 @@ export default {
   },
 
   methods: {
+    getTodayTimestamp(timeStr) {
+      const [H, M] = timeStr.split(":").map(Number);
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate(), H, M, 0).getTime();
+    },
+
     update() {
-      const end = this.startTimestamp + this.durationMin * 60 * 1000;
-      const diff = end - Date.now();
+      const startTs = this.getTodayTimestamp(this.startTime);
+      const endTs = startTs + this.durationMin * 60 * 1000;
+      const diff = endTs - Date.now();
 
       if (diff <= 0) {
         this.remaining = "00:00";
@@ -36,10 +43,10 @@ export default {
         return;
       }
 
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
+      const min = Math.floor(diff / 60000);
+      const sec = Math.floor((diff % 60000) / 1000);
 
-      this.remaining = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+      this.remaining = String(min).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
     },
   },
 };
