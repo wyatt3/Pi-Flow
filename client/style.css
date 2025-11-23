@@ -7,7 +7,9 @@
     --toggle-bg-off: #0dcaf0;
     --toggle-border-on: #e7af06;
     --toggle-border-off: #0eb3d4;
-    --toggle-height: 2rem;
-    --toggle-border: 0.125rem;
+    --toggle-text-on: #333;
+    --toggle-height: 1.75rem;
+    --toggle-width: 6.5rem;
+    --toggle-border: 0.15rem;
     --toggle-font-size: 0.85rem;
 }

@@ -81,8 +81,13 @@ export default class ScheduleService {
 
         const result = db.prepare(
             `SELECT * FROM relays WHERE id = ?`
-        ).run(schedule.relay_id);
+        ).get(schedule.relay_id);
         const relay = new Relay(result);
+        if (!relay) {
+            console.log(`Schedule: ${schedule.id} has an invalid relay_id, deleting`);
+            ScheduleService.deleteSchedule(schedule);
+            return;
+        }
         RelayService.save(relay, 0);
         console.log(`Activated GPIO Pin: ${relay.gpio_pin}`);
 

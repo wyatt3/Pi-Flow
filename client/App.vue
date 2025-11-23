@@ -44,8 +44,17 @@
       </button>
     </modal>
 
-    <modal :open="selectedRelay" @toggle="selectedRelay = null">
+    <modal
+      :open="selectedRelay"
+      @toggle="
+        resetNewSchedule();
+        selectedRelay = null;
+      "
+    >
       <h1>Schedules</h1>
+      <div v-if="!addingSchedule && selectedRelay.schedules.length == 0" class="schedule p-3 mb-3 text-center">
+        No schedules
+      </div>
       <div class="schedule p-3 mb-3 position-relative" v-for="schedule in selectedRelay.schedules" :key="schedule.id">
         <button class="btn btn-danger delete-schedule bi bi-x" @click="deleteSchedule(schedule)"></button>
         <div class="d-flex flex-wrap">
@@ -70,8 +79,8 @@
             <span>{{ schedule.duration_min }} minute{{ schedule.duration_min > 1 ? "s" : "" }}</span>
           </div>
           <div class="schedule-item">
-            <label class="fw-bold me-2">One-Off: </label>
-            <span>{{ schedule.one_time ? "Yes" : "No" }}</span>
+            <label class="fw-bold me-2">Type: </label>
+            <span>{{ schedule.one_time ? "One-Off" : "Recurring" }}</span>
           </div>
           <div class="schedule-item">
             <label class="fw-bold me-2">Status:</label>
@@ -94,7 +103,7 @@
           {{ schedule.skip_next ? "Unskip Next Occurrence" : "Skip Next Occurrence" }}
         </button>
       </div>
-      <div v-if="addingSchedule">
+      <div class="schedule p-3" v-if="addingSchedule">
         <label class="fw-bold">Start Time: </label>
         <input v-model="newSchedule.start_time" type="time" class="form-control mb-2" />
         <label class="fw-bold">Duration: </label>
@@ -107,7 +116,7 @@
           <div v-for="(day, dayNumber) in dayNames" :key="day">
             <button
               @click="toggleDay(newSchedule, dayNumber)"
-              class="btn"
+              class="day-btn btn"
               :class="{ 'btn-info': newSchedule.days.includes(dayNumber) }"
             >
               {{ day }}
@@ -117,7 +126,7 @@
         <div class="mb-2">
           <label class="fw-bold">Type: </label>
           <br />
-          <Toggle v-model="newSchedule.one_time" offLabel="Recurring" onLabel="One-Off" />
+          <Toggle class="mb-2 mt-1 ms-2" v-model="newSchedule.one_time" offLabel="Recurring" onLabel="One-Off" />
         </div>
         <div class="d-flex gap-2">
           <button class="btn btn-danger w-50" @click="resetNewSchedule">Cancel</button>
