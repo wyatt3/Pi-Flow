@@ -1,4 +1,5 @@
 import db from '../config/db.js';
+import pinToLineMap from '../config/pinToLineMap.js';
 import Relay from '../models/relay.js';
 import RelayService from '../services/relayService.js';
 
@@ -17,7 +18,8 @@ export default class RelayController {
 
     static create(req, res) {
         const { name, gpio_pin } = req.body;
-        if (!name || gpio_pin == null) return res.status(400).json({ error: 'name & gpio_pin required' });
+        if (!name || gpio_pin == null) return res.status(400).json('name & gpio_pin required');
+        if (!(pinToLineMap[gpio_pin])) return res.status(400).json('Invalid GPIO pin');
         try {
             const relay = RelayService.create(name, gpio_pin);
             return res.status(201).json(relay);
