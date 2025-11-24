@@ -56,52 +56,59 @@
         No schedules
       </div>
       <div class="schedule p-3 mb-3 position-relative" v-for="schedule in selectedRelay.schedules" :key="schedule.id">
-        <button class="btn btn-danger delete-schedule bi bi-x" @click="deleteSchedule(schedule)"></button>
-        <div class="d-flex flex-wrap">
-          <div class="schedule-item">
-            <label class="fw-bold me-2">Start Time: </label>
-            <span>{{ convertTime(schedule.start_time) }}</span>
-          </div>
-          <div class="d-flex schedule-item">
-            <label class="fw-bold me-2">Days: </label>
-            <div class="d-flex gap-2">
-              <span
-                class="day-box"
-                :class="{ 'bg-info': schedule.days.includes(dayNumber) }"
-                v-for="(day, dayNumber) in dayNames"
-                :key="dayNumber"
-                >{{ day }}
+        <div v-if="schedule.editing"></div>
+        <div v-else>
+          <button class="btn btn-danger delete-schedule bi bi-x" @click="deleteSchedule(schedule)"></button>
+          <div class="d-flex flex-wrap justify-content-end">
+            <div class="schedule-item start-time">
+              <label class="fw-bold me-2">Start Time: </label>
+              <span>{{ convertTime(schedule.start_time) }}</span>
+            </div>
+            <div class="schedule-item duration">
+              <label class="fw-bold me-2">Duration: </label>
+              <span>{{ schedule.duration_min }} minute{{ schedule.duration_min > 1 ? "s" : "" }}</span>
+            </div>
+            <div class="d-flex schedule-item days">
+              <label class="fw-bold me-2">Days: </label>
+              <div class="d-flex gap-2">
+                <span
+                  class="day-box"
+                  :class="{ 'bg-info': schedule.days.includes(dayNumber) }"
+                  v-for="(day, dayNumber) in dayNames"
+                  :key="dayNumber"
+                  >{{ day }}
+                </span>
+              </div>
+            </div>
+            <div class="schedule-item type">
+              <label class="fw-bold me-2">Type: </label>
+              <span>{{ schedule.one_time ? "One-Off" : "Recurring" }}</span>
+            </div>
+            <div class="schedule-item status">
+              <label class="fw-bold me-2">Status:</label>
+
+              <span v-if="schedule.status !== 'running'" class="px-2 py-1 rounded text-uppercase bg-success text-white">
+                {{ schedule.status }}
+              </span>
+
+              <span v-else class="px-2 py-1 rounded text-uppercase bg-warning">
+                Running -
+                <Countdown :startTime="schedule.start_time" :durationMin="schedule.duration_min" />
               </span>
             </div>
           </div>
-          <div class="schedule-item">
-            <label class="fw-bold me-2">Duration: </label>
-            <span>{{ schedule.duration_min }} minute{{ schedule.duration_min > 1 ? "s" : "" }}</span>
-          </div>
-          <div class="schedule-item">
-            <label class="fw-bold me-2">Type: </label>
-            <span>{{ schedule.one_time ? "One-Off" : "Recurring" }}</span>
-          </div>
-          <div class="schedule-item">
-            <label class="fw-bold me-2">Status:</label>
-
-            <span v-if="schedule.status !== 'running'" class="px-2 py-1 rounded text-uppercase bg-success text-white">
-              {{ schedule.status }}
-            </span>
-
-            <span v-else class="px-2 py-1 rounded text-uppercase bg-warning">
-              Running -
-              <Countdown :startTime="schedule.start_time" :durationMin="schedule.duration_min" />
-            </span>
-          </div>
+          <button
+            @click="toggleSkipNext(schedule)"
+            class="w-100 mt-3 btn btn-warning"
+            :class="{ 'btn-danger': schedule.skip_next }"
+          >
+            <i class="bi" :class="schedule.skip_next ? 'bi-skip-backward-fill' : 'bi-skip-forward-fill'"></i>
+            {{ schedule.skip_next ? "Unskip Next Occurrence" : "Skip Next Occurrence" }}
+          </button>
+          <button @click="schedule.editing = true" class="w-100 mt-3 btn btn btn-outline-dark">
+            <i class="bi bi-pencil"></i> Edit Schedule
+          </button>
         </div>
-        <button
-          @click="toggleSkipNext(schedule)"
-          class="w-100 mt-3 btn btn-warning"
-          :class="{ 'btn-danger': schedule.skip_next }"
-        >
-          {{ schedule.skip_next ? "Unskip Next Occurrence" : "Skip Next Occurrence" }}
-        </button>
       </div>
       <div class="schedule p-3" v-if="addingSchedule">
         <label class="fw-bold">Start Time: </label>
@@ -343,6 +350,26 @@ td {
 }
 
 @media screen and (min-width: 600px) {
+  .start-time {
+    order: 1;
+  }
+
+  .duration {
+    order: 3;
+  }
+
+  .days {
+    order: 2;
+  }
+
+  .type {
+    order: 4;
+  }
+
+  .status {
+    order: 5;
+  }
+
   .schedule-item {
     width: 50%;
   }
