@@ -26,7 +26,7 @@ export default class RelayService {
 
     static delete(relay) {
         if (relay.gpio) relay.gpio.writeSync(1);
-        // delete schedules
+        //TODO: delete schedules
         db.prepare(`DELETE FROM relays WHERE id = ?`).run(relay.id);
         websocketService.broadcastUpdate();
     }
