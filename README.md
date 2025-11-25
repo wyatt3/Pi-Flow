@@ -10,10 +10,10 @@ Depending on what related hardware you already have (sprinkler valves, valve pow
 - Vue 3 and Vite (front-end)
 
 ## Hardware
-* A minimum of a Raspberry Pi Zero W (with a few small caveats during setup). [https://www.adafruit.com/product/3400](AdaFruit) has them for a pretty reasonable price ($15 as of November 2025).
+* A minimum of a Raspberry Pi Zero W (with a few small caveats during setup). [AdaFruit](https://www.adafruit.com/product/3400) has them for a pretty reasonable price ($15 as of November 2025).
     * A Micro SD Card (8 GB is plenty).
     * Micro USB Cable and 5V Power Adapter.
-* Any Relay Board (ideally one with optocoupling). You can find these on [https://aliexpress.com](AliExpress) or [https://digikey.com](DigiKey) for a few dollars.
-* Jumper Wires (to connect the Pi and Relay Board). Again, you can find these on [https://aliexpress.com](AliExpress) or [https://digikey.com](DigiKey) for a few dollars.
+* Any Relay Board (ideally one with optocoupling). You can find these on [AliExpress](https://aliexpress.com) or [DigiKey](https://digikey.com) for a few dollars.
+* Jumper Wires (to connect the Pi and Relay Board). Again, you can find these on [AliExpress](https://aliexpress.com) or [DigiKey](https://digikey.com) for a few dollars.
 
 
