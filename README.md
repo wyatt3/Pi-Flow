@@ -55,9 +55,9 @@ TIMEZONE=America/New_York
 ```
 
 * Change the value of `TIMEZONE` to your current timezone. You can find the name of your current timezone [here](https://momentjs.com/timezone/).
-* For regular use, `PORT` and `VITE_WS_PORT` should always be the same value, but don't necessarily have to stay `80`. They can be changed to any valid port number, although you will need to rebuild the front-end every time you change `VITE_WS_PORT`.
+* `PORT` and `VITE_WS_PORT` should always be the same value, but don't necessarily have to stay `80`. They can be changed to any valid port number, although you will need to rebuild the front-end every time you change `VITE_WS_PORT`.
 
-If you're setting up for development, skip to the [Development Setup](#development-setup) section now.
+**If you're setting up for development, skip to the [Development Setup](#development-setup) section now.**
 
 * Change the value of `GPIO_ENABLED` to `true`.
 
@@ -157,3 +157,25 @@ scp /path/to/pi-flow/public {pi-user}@{pi-ip-address}:/path/to/pi-flow/
 Now that you have a compiled front-end on your Pi, you can continue the normal setup instructions at [Start the Back-End](#start-the-back-end) from your Pi.
 
 # Development Setup
+
+## Starting the Container
+
+In the project's root directory, run:
+```
+docker compose up -d --build
+```
+Once the container builds and starts, the app should be available at `http://localhost:5173`. 
+
+## Making Changes
+Before making any changes, please review the [Contribution Guidelines](CONTRIBUTING.md).
+The processes running inside the container will watch for any changes to the source files and update in real time.
+
+You can monitor these processes by running: 
+```
+docker logs -f pi-flow
+```
+To import new packages or run any other `npm` related commands, we must first enter the container by running:
+```
+docker compose exec -it app bash
+```
+Once inside the container you can use `npm` as you normally would.
