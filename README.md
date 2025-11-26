@@ -109,9 +109,21 @@ systemctl status piflow.service
 # Raspberry Pi Zero W Specific Installation Instructions
 
 ## Install NPM Dependencies
+
 ```
 cd pi-flow
 npm install --omit=dev
 ```
-The `--omit=dev` flag is necessary here when installing on a Raspberry Pi Zero W, because of the dated ARMv6 architecture of the SOC. The Rapsberry Pi Zero W cannot run vite, which we use for the front end asset bundling. I'll cover 
+
+The `--omit=dev` flag is necessary here when installing on a Raspberry Pi Zero W, because of the dated ARMv6 architecture of the SOC. The Rapsberry Pi Zero W cannot run vite, which we use for the front end asset bundling, but we have a pretty easy work-around! We can build the front-end on a more capable machine, and then copy the files over to our Pi. This is why I suggested configuring SSH earlier.
+
+To do this, on your more capable machine, follow all the steps from [getting started] (#getting-started) all the way down to [building the front-end] (#build-the-front-end).
+
+Then, copy the resulting `public` directory in the project to your Pi with `scp`:
+
+```
+scp /path/to/pi-flow/public {pi-user}@{pi-ip-address}:/path/to/pi-flow/
+```
+Now that you have a compiled front-end on your Pi, you can continue the normal setup instructions at [Start the Back-End] (#start-the-back-end) from your Pi
+
 # Installation and Setup (for development)
