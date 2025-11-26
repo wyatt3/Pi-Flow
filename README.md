@@ -19,24 +19,52 @@ Depending on what related hardware you already have (sprinkler valves, valve pow
 * Any Relay Board(s) (one with optocoupling if you're using a 3.3v based Pi), the number of relays you want is only limited by the number of GPIO pins on your main board. You can find these on [AliExpress](https://aliexpress.com) or [DigiKey](https://digikey.com) for a few dollars.
 * Jumper Wires (to connect the Pi and Relay Board). Again, you can find these on [AliExpress](https://aliexpress.com) or [DigiKey](https://digikey.com) for a few dollars.
 
-# Installation and Setup (for regular use)
+# Installation and Setup
 
 You may notice this repo contains a `docker-compose.yml` file. Currently, docker is only used for the development side of this project, and not the production side, due to certain limitations of the Raspberry Pi Zero W.
-I'll cover the development setup in [its own section](#installation-and-setup-for-development) below.
+So for now, Pi Flow is designed to be deployed without containerization. If you want to set up the development side of the project, keep following the instructions here for now, and we'll break off when the setup process diverges.
 
 ## Getting Started
 
-I won't cover how to flash an OS to a Raspberry Pi, or how to install Node.js and npm, because there's plenty of guides on how to do that already, but to run Pi Flow, you'll need some OS that you're comfortable with (I'm using Raspbian Lite) configured to have internet access, and have `git`, `node`, and `npm` installed.  
-If you're using a Raspberry Pi Zero, it's a good idea to also configure SSH access and do the rest of the setup remotely from another computer (I'll talk about why this is important later).
+I won't cover how to flash an OS to a Raspberry Pi, or how to install Node.js and npm, because there's plenty of guides on how to do that already, but to run Pi Flow, you'll need some OS that you're comfortable with (I'm using the latest version of [Raspberry Pi OS Lite](https://www.raspberrypi.com/software/operating-systems/)) configured to have internet access, and have `git`, `node`, and `npm` installed.  
+
+If you're setting up for development, you'll only need `git` and `docker` installed.
+
+If you're using a Raspberry Pi Zero W, it's a good idea to also configure SSH access and do the rest of the setup remotely from another computer (I'll talk about why this is important later).
 
 ## Clone the Repo
 
 ```
 git clone https://github.com/wyatt3/pi-flow.git pi-flow
+cd pi-flow
 ```
 
+## Copy the .env.example file
+
+```
+cp .env.example .env
+```
+
+Your new .env file will contain the following:
+
+```
+PORT=80
+VITE_WS_PORT=80
+GPIO_ENABLED=false
+TIMEZONE=America/New_York
+```
+
+* Change the value of `TIMEZONE` to your current timezone. You can find the name of your current timezone [here](https://momentjs.com/timezone/).
+* For regular use, `PORT` and `VITE_WS_PORT` should always be the same value, but don't necessarily have to stay `80`. They can be changed to any valid port number, although you will need to rebuild the front-end every time you change `VITE_WS_PORT`.
+
+If you're setting up for development, skip to the [Development Setup](#development-setup) section now.
+
+* Change the value of `GPIO_ENABLED` to `true`.
+
 ## Install NPM Dependencies
+
 If you are using a Raspberry Pi Zero W, skip to the [Raspberry Pi Zero W Specific Installation Instructions](#raspberry-pi-zero-w-specific-installation-instructions) section
+
 ```
 cd pi-flow
 npm install
@@ -106,6 +134,8 @@ You can check the status of your new service with:
 systemctl status piflow.service
 ```
 
+You should see somewhere in the output: `enabled`, and `active (running)`. If not something went wrong with either your service configuration or your Pi Flow installation.
+
 # Raspberry Pi Zero W Specific Installation Instructions
 
 ## Install NPM Dependencies
@@ -124,6 +154,6 @@ Then, copy the resulting `public` directory in the project to your Pi with `scp`
 ```
 scp /path/to/pi-flow/public {pi-user}@{pi-ip-address}:/path/to/pi-flow/
 ```
-Now that you have a compiled front-end on your Pi, you can continue the normal setup instructions at [Start the Back-End](#start-the-back-end) from your Pi
+Now that you have a compiled front-end on your Pi, you can continue the normal setup instructions at [Start the Back-End](#start-the-back-end) from your Pi.
 
-# Installation and Setup (for development)
+# Development Setup
