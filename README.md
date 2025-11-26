@@ -42,6 +42,70 @@ cd pi-flow
 npm install
 ```
 
+## Build the Front-End
+
+```
+npm run build
+```
+
+## Start the Back-End
+
+```
+npm start
+```
+Your Pi Flow app should now be available in your browser at `http://{pi-ip-address}`
+
+# Getting Pi Flow to start on boot
+
+If you want Pi Flow to start automatically every time your Pi boots up, you can create a service file and use `systemd` to achieve this.
+
+Create a `piflow.service` file:
+
+```
+sudo nano /etc/systemd/system/piflow.service
+```
+
+Put the following into the service file:
+
+```
+[Unit]
+Description=Pi Flow Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/npm start
+WorkingDirectory=/path/to/pi-flow
+Restart=on-failure
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Reload systemd so it finds your service:
+
+```
+systemctl daemon-reload
+```
+
+Enable the new service so it starts on every boot:
+
+```
+systemctl enable piflow.service
+```
+
+Finally, start the service:
+
+```
+systemctl start piflow.service
+```
+
+You can check the status of your new service with:
+
+```
+systemctl status piflow.service
+```
+
 # Raspberry Pi Zero W Specific Installation Instructions
 
 ## Install NPM Dependencies
