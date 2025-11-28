@@ -3,4 +3,3 @@ docker-compose.override.yml
 database/
 node_modules/
 public/*
-src/config/pinToLineMap.json

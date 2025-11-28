@@ -1,7 +1,6 @@
-import { Gpio } from 'onoff';
+import { Chip, Line } from 'node-libgpiod'
 import db from '../config/db.js';
 import Schedule from './schedule.js';
-import pinToLineMap from '../config/pinToLineMap.js';
 
 export default class Relay {
     constructor({ id = null, name, gpio_pin, active = 1 }) {
@@ -10,7 +9,14 @@ export default class Relay {
         this.name = name;
         this.gpio_pin = gpio_pin;
         this.active = active;
-        this.gpio = gpioEnabled ? new Gpio(pinToLineMap[this.gpio_pin], active == 0 ? 'out' : 'high') : null;
+        if (gpioEnabled) {
+            const chip = new Chip(0);
+            this.gpio = new Line(chip, this.gpio_pin);
+            this.gpio.requestOutputMode();
+            this.gpio.setValue(this.active);
+        } else {
+            this.gpio = null;
+        }
         const result = db.prepare('SELECT * FROM schedules WHERE relay_id = ?').all(this.id);
         this.schedules = result.map((schedule) => new Schedule(schedule));
     }
