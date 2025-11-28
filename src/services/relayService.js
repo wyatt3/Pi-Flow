@@ -19,7 +19,10 @@ export default class RelayService {
        WHERE id = ?`,
         ).run(active, relay.id);
         relay.active = active;
-        relay.setValue(active);
+        relay.setValue(active, (err) => {
+            if (err) console.error(err);
+            else console.log(`Relay ${relay.name} updated → ${relay.active ? 'ON' : 'OFF'}`);
+        });
         websocketService.broadcastUpdate();
         return relay;
     }
