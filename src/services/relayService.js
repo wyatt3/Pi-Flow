@@ -19,13 +19,13 @@ export default class RelayService {
        WHERE id = ?`,
         ).run(active, relay.id);
         relay.active = active;
-        if (relay.gpio) relay.gpio.setValue(active);
+        relay.setValue(active);
         websocketService.broadcastUpdate();
         return relay;
     }
 
     static delete(relay) {
-        if (relay.gpio) relay.gpio.setValue(1);
+        relay.setValue(1);
         //TODO: delete schedules
         db.prepare(`DELETE FROM relays WHERE id = ?`).run(relay.id);
         websocketService.broadcastUpdate();
